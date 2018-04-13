@@ -1,3 +1,6 @@
+# To Run:
+This is an android application made through android studio. Just clone this project into any android studio IDE and click the green play button to run on physical or emulated android device. The loading of the content does take some time in it's v1 phase but an update will be pushed with improvements.
+
 # Technical Interview Homework: GitHub Dashboard
 
 
