@@ -55,15 +55,15 @@ public class EventAdapter extends ArrayAdapter<Event> {
         descriptionTxt.setText((currentEvent.getDescription().equals("null") ? "No description." : currentEvent.getDescription()));
 
         TextView starTxt = listItemView.findViewById(R.id.star_txt);
-        starTxt.setText(String.valueOf(currentEvent.getStars()));
+        starTxt.setText(currentEvent.getStars() == -1 ? "" :(String.valueOf(currentEvent.getStars())));
         Log.e(LOG_TAG, "<<<STAR: " + String.valueOf(currentEvent.getStars()));
 
         TextView watchTxt = listItemView.findViewById(R.id.watch_txt);
-        watchTxt.setText(String.valueOf(currentEvent.getWatches()));
+        watchTxt.setText(currentEvent.getWatches() == -1 ? "" : String.valueOf(currentEvent.getWatches()));
         Log.e(LOG_TAG, "<<<WATCH: " + String.valueOf(currentEvent.getWatches()));
 
         TextView forkTxt = listItemView.findViewById(R.id.fork_txt);
-        forkTxt.setText(String.valueOf(currentEvent.getForks()));
+        forkTxt.setText(currentEvent.getForks() == -1 ? "" : String.valueOf(currentEvent.getForks()));
         Log.e(LOG_TAG, "<<<FORK: " + String.valueOf(currentEvent.getForks()));
 
         TextView dateTxt = listItemView.findViewById(R.id.date_txt);

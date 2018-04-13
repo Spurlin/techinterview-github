@@ -189,6 +189,8 @@ public class QueryUtils {
                             map.get("repoUrl").toString(), map.get("description").toString(),
                             Integer.parseInt(map.get("stars").toString()), Integer.parseInt(map.get("watches").toString()),
                             Integer.parseInt(map.get("forks").toString()), formatDate(event.getString("created_at"))));
+                    Log.e(LOG_TAG, "<<<DATE: " + event.getString("created_at"));
+                    Log.e(LOG_TAG, "<<<FORMATED DATE: " + formatDate(event.getString("created_at")));
                 }
             }
 
@@ -200,8 +202,8 @@ public class QueryUtils {
     }
 
     private static String formatDate(String dateString) {
-        dateString = dateString.substring(0, dateString.indexOf("T") - 1);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
+        dateString = dateString.substring(0, dateString.indexOf("T"));
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date newDate = format.parse(dateString);
             format = new SimpleDateFormat("MMM dd, yyyy");
