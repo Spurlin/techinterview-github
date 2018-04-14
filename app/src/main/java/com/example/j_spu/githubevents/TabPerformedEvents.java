@@ -153,6 +153,7 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
             mUsernameHeader.setVisibility(View.VISIBLE);
             mAccountBtn.setImageBitmap(Bitmap.createScaledBitmap((PublicEventActivity.mUser.getAvatar()), 100, 100, true));
         } else {
+            PublicEventActivity.mUser = null;
             mEmptyStateImgView.setImageResource(R.drawable.ic_account_circle_black_24dp);
             mEmptyStateTxtView.setText("Sign in to see your public events.");
             mEmptyStateLinLayout.setVisibility(View.VISIBLE);

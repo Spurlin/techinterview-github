@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,8 +46,8 @@ public class QueryUtils {
     public static List<Event> fetchEventData(String requestUrl) {
 
         if (requestUrl.contains(":username") && creds.length > 0) {
-            basicAuth = "Basic " + Base64.encodeToString((creds[0] + ":" + creds[1]).getBytes(),Base64.NO_WRAP);
-            Log.e(LOG_TAG, "<<<UPDATING BASICAUTH");
+//            basicAuth = "Basic " + Base64.encodeToString((creds[0] + ":" + creds[1]).getBytes(),Base64.NO_WRAP);
+//            Log.e(LOG_TAG, "<<<UPDATING BASICAUTH");
             creds = null;
         }
 
@@ -97,7 +98,7 @@ public class QueryUtils {
             urlConnection.setRequestProperty("Accept-Encoding", "identity");
             urlConnection.setRequestProperty("User-Agent", "GitHub_Events/1.0");
             urlConnection.setRequestProperty("connection", "close");
-            if(basicAuth != null) { urlConnection.setRequestProperty("Authorization", basicAuth); }
+//            if(basicAuth != null) { urlConnection.setRequestProperty("Authorization", basicAuth); }
             urlConnection.connect();
 
             // if the request was successful (response code 200),
