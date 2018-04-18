@@ -109,6 +109,7 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
             // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
             // because this activity implements the LoaderCallbacks interface).
             loaderManager.initLoader(EVENT_LOADER_ID, null, this);
+            getLoaderManager().getLoader(EVENT_LOADER_ID).forceLoad();
             Log.i(LOG_TAG, "--INIT LOADER--");
         } else {
             // otherwise, display error
