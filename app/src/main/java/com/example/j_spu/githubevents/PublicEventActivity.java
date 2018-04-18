@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 
 public class PublicEventActivity extends AppCompatActivity {
 
@@ -14,6 +16,7 @@ public class PublicEventActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private TabLayout tabLayout;
+    private ImageButton mRefresh;
     public static User mUser;
 
     @Override
@@ -33,6 +36,31 @@ public class PublicEventActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        mRefresh = (ImageButton) findViewById(R.id.refresh_button);
+        mRefresh.setOnClickListener(refreshButtonClicked());
+
+
+    }
+
+    /**
+     * this method contains the OnClickListener for the refresh button. Any modifications
+     * to the click event should happen in this method
+     * @return the click listener for the refresh button
+     */
+    private View.OnClickListener refreshButtonClicked() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switch (mViewPager.getCurrentItem()) {
+                    case 0:
+                        TabAllEvents.mRefreshBtn.performClick();
+                        break;
+                    case 1:
+                        TabPerformedEvents.mRefreshBtn.performClick();
+                        break;
+                }
+            }
+        };
     }
 
     /**

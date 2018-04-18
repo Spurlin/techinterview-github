@@ -3,9 +3,7 @@ package com.example.j_spu.githubevents;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +32,6 @@ public class QueryUtils {
     private static int count;
     private static String currentUrl;
     private static String repoInfoUrl;
-    private static ArrayList<Map> mapArrayList = new ArrayList<>();
     private static String basicAuth;
     public static String[] creds = {};
     private static final String CLIENT_INFO = "?client_id=e53bb94f9c15a36afebd&client_secret=f23dfaa03e54dfbb4ca57740ba565d8043c4201b";
@@ -154,45 +151,55 @@ public class QueryUtils {
         try {
             Log.i(LOG_TAG, "Trying to get the event data");
 
+            // root of the JSON response
             JSONArray rootArray = new JSONArray(jsonResponse);
-//            repoInfoUrl = new String[rootArray.length()];
 
             for (int i = 0; i < rootArray.length(); i++) {
-                String tempType = "";
-                Date tempDate;
-                User tempUser;
 
+                // the ith event from the root array
+                final JSONObject event = rootArray.getJSONObject(i);
 
-
-                JSONObject event = rootArray.getJSONObject(i);
-
-                tempType = event.getString("type");
+                final String tempType = event.getString("type");
                 JSONObject user = event.getJSONObject("actor");
-                tempUser = new User(user.getString("display_login"),
+                final User tempUser = new User(user.getString("display_login"),
                         getUserAvatar(user.getString("avatar_url")));
 
+                // if this is the first event from the user who signed in,
+                // store that user in our main activity
                 if (currentUrl.contains("/users") && i == 0
                         && (!currentUrl.contains(":username"))) {
                     PublicEventActivity.mUser = tempUser;
                 }
 
-                JSONObject repo = event.getJSONObject("repo");
-                repoInfoUrl = repo.getString("url") + CLIENT_INFO;
+                // JSON object for the repository
+                final JSONObject repo = event.getJSONObject("repo");
+                repoInfoUrl = repo.getString("url") + CLIENT_INFO; // url used to get the repo html link
 
-                map = getRepoInfo(repoInfoUrl);
+                // start these last steps on a new thread to increase load time
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        map = getRepoInfo(repoInfoUrl);
 
-                if (map == null) {
-                    // if the repository doesn't exist anymore
-                    defaultUrl = defaultUrl.replace(":username", tempUser.getUsername());
-                    events.add(new Event(tempUser, tempType, repo.getString("name"), defaultUrl, "Repository doesn't exist anymore.",-1 ,-1, -1, null));
-                } else {
-                    events.add(new Event(tempUser, tempType, repo.getString("name"),
-                            map.get("repoUrl").toString(), map.get("description").toString(),
-                            Integer.parseInt(map.get("stars").toString()), Integer.parseInt(map.get("watches").toString()),
-                            Integer.parseInt(map.get("forks").toString()), formatDate(event.getString("created_at"))));
-                    Log.e(LOG_TAG, "<<<DATE: " + event.getString("created_at"));
-                    Log.e(LOG_TAG, "<<<FORMATED DATE: " + formatDate(event.getString("created_at")));
-                }
+                        try {
+                            if (map == null) {
+                                // if the repository doesn't exist anymore
+                                defaultUrl = defaultUrl.replace(":username", tempUser.getUsername());
+                                events.add(new Event(tempUser, tempType, repo.getString("name"), defaultUrl, "Repository doesn't exist anymore.",-1 ,-1, -1, null));
+                            } else {
+                                events.add(new Event(tempUser, tempType, repo.getString("name"),
+                                        map.get("repoUrl").toString(), map.get("description").toString(),
+                                        Integer.parseInt(map.get("stars").toString()), Integer.parseInt(map.get("watches").toString()),
+                                        Integer.parseInt(map.get("forks").toString()), formatDate(event.getString("created_at"))));
+                                Log.e(LOG_TAG, "<<<DATE: " + event.getString("created_at"));
+                                Log.e(LOG_TAG, "<<<FORMATED DATE: " + formatDate(event.getString("created_at")));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                thread.start();
             }
 
         } catch(JSONException e) {
@@ -202,6 +209,12 @@ public class QueryUtils {
         return events;
     }
 
+    /**
+     * this is used to format the date that is received into
+     * MMM dd, yyyy format (i.e. Apr 18, 2016)
+     * @param dateString
+     * @return formatted date string
+     */
     private static String formatDate(String dateString) {
         dateString = dateString.substring(0, dateString.indexOf("T"));
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -216,6 +229,12 @@ public class QueryUtils {
         return dateString;
     }
 
+    /**
+     * this is used to make a HTTP request with the repository url
+     * @param repoInfoUrl
+     * @return  Map<String, String> with the key value pairs of the
+     *          necessary repository details
+     */
     private static Map getRepoInfo(String repoInfoUrl) {
 
         // Create URL object
@@ -232,6 +251,13 @@ public class QueryUtils {
         return extractRepoInfo(jsonResponse);
     }
 
+    /**
+     * this extracts the needed repository details and returns them in a
+     * map with key value pairs
+     * @param jsonResponse
+     * @return Map<String, String> with the key value pairs of the
+     *          necessary repository details
+     */
     public static Map<String, String> extractRepoInfo(String jsonResponse) {
 
         // if the JSON string is empty or null, then return early
@@ -264,6 +290,11 @@ public class QueryUtils {
         return map;
     }
 
+    /**
+     * this is used to extract the avatar image for each user
+     * @param url of the users avatar
+     * @return Bitmap of the avatar image
+     */
     private static Bitmap getUserAvatar(String url) {
         Bitmap avatarImage = null;
 

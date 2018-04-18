@@ -37,7 +37,7 @@ public class TabAllEvents extends Fragment implements android.support.v4.app.Loa
     private LinearLayout mEmptyStateLinLayout;
     private ProgressBar mLoadingBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ImageButton mRefreshBtn;
+    public static ImageButton mRefreshBtn;
     private ImageButton mAccountBtn;
     private String baseUrl =
             "https://api.github.com/events?client_id=e53bb94f9c15a36afebd&client_secret=f23dfaa03e54dfbb4ca57740ba565d8043c4201b";
@@ -65,21 +65,15 @@ public class TabAllEvents extends Fragment implements android.support.v4.app.Loa
 
         eventListView.setEmptyView(mEmptyStateLinLayout);
 
-        mAccountBtn = (ImageButton) container.getRootView().findViewById(R.id.account_button);
-        mAccountBtn.setOnClickListener(accountButtonClicked(getContext()));
-//
-        mRefreshBtn = (ImageButton) container.getRootView().findViewById(R.id.refresh_button);
+        mRefreshBtn = (ImageButton) container.getRootView().findViewById(R.id.refresh_all_button);
         mRefreshBtn.setOnClickListener(refreshButtonClicked(getContext()));
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mEmptyStateLinLayout.setVisibility(View.GONE);
-                mAdapter.clear();
-                resetLoader();
+                mRefreshBtn.performClick();
                 mSwipeRefreshLayout.setRefreshing(false);
-                TabAllEvents newEvent = new TabAllEvents();
             }
         });
 
@@ -103,6 +97,7 @@ public class TabAllEvents extends Fragment implements android.support.v4.app.Loa
             // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
             // because this activity implements the LoaderCallbacks interface).
             loaderManager.initLoader(EVENT_LOADER_ID, null, this);
+            getLoaderManager().getLoader(EVENT_LOADER_ID).forceLoad();
             Log.i(LOG_TAG, "--INIT LOADER--");
         } else {
             // otherwise, display error
@@ -133,10 +128,10 @@ public class TabAllEvents extends Fragment implements android.support.v4.app.Loa
 
         mLoadingBar.setVisibility(View.GONE);
 
-        // Clear the adapter of previous book data
+        // Clear the adapter of previous event data
         mAdapter.clear();
 
-        // If there is a valid list of {@link Book}s, then add them to the adapter's
+        // If there is a valid list of {@link Event}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         if ( events != null && !events.isEmpty()) {
             mAdapter.addAll(events);
@@ -152,32 +147,7 @@ public class TabAllEvents extends Fragment implements android.support.v4.app.Loa
 
     private void resetLoader() {
         getLoaderManager().restartLoader(EVENT_LOADER_ID, null, this);
-    }
-
-    /**
-     * this method contains the OnClickListener for the user account button. Any modifications
-     * to the click event should happen in this method
-     * @param context
-     * @return the click listener for the user account button
-     */
-    private View.OnClickListener accountButtonClicked(final Context context) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (PublicEventActivity.mUser == null) {
-                    // sign in
-                    String username = "Spurlin";
-                    String password = ":)spur594J1995";
-
-                    resetLoader();
-                    return;
-                }
-
-                // ask to sign out
-                resetLoader();
-            }
-        };
+        getLoaderManager().getLoader(EVENT_LOADER_ID).forceLoad();
     }
 
     /**

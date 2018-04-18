@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PublicEventActivity" android:configChanges="orientation|screenSize"/>
+        <activity android:name=".PublicEventActivity" android:configChanges="orientation|screenSize" />
     </application>
 
 </manifest>

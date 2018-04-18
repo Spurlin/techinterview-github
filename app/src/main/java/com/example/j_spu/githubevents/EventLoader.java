@@ -9,14 +9,13 @@ public class EventLoader extends AsyncTaskLoader<List<Event>> {
 
     private static final String LOG_TAG = EventLoader.class.getSimpleName();
     private String mUrl;
+    private Context mContext;
 
     public EventLoader(Context context, String url) {
         super(context);
+        mContext = context;
         mUrl = url;
     }
-
-    @Override
-    protected void onStartLoading() { forceLoad(); }
 
     @Override
     public List<Event> loadInBackground() {
@@ -25,4 +24,5 @@ public class EventLoader extends AsyncTaskLoader<List<Event>> {
         List<Event> events = QueryUtils.fetchEventData(mUrl);
         return events;
     }
+
 }

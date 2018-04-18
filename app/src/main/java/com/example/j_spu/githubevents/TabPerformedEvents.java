@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +41,13 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
     private TextView mEmptyStateTxtView;
     private LinearLayout mEmptyStateLinLayout;
     private ProgressBar mLoadingBar;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ImageButton mRefreshBtn;
+    public static SwipeRefreshLayout mSwipeRefreshLayout;
+    public static ImageButton mRefreshBtn;
     private ImageButton mAccountBtn;
     private TextView mUsernameHeader;
     private static String baseUrl =
             "https://api.github.com/users/:username/events/public?client_id=e53bb94f9c15a36afebd&client_secret=f23dfaa03e54dfbb4ca57740ba565d8043c4201b";
 
-//    :username
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,7 +72,7 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
 
         eventListView.setEmptyView(mEmptyStateLinLayout);
 
-        mRefreshBtn = (ImageButton) container.getRootView().findViewById(R.id.refresh_button);
+        mRefreshBtn = (ImageButton) container.getRootView().findViewById(R.id.refresh_performed_button);
         mRefreshBtn.setOnClickListener(refreshButtonClicked(getContext()));
 
         mAccountBtn = (ImageButton) container.getRootView().findViewById(R.id.account_button);
@@ -84,11 +84,8 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mEmptyStateLinLayout.setVisibility(View.GONE);
-                mAdapter.clear();
-                resetLoader();
+                mRefreshBtn.performClick();
                 mSwipeRefreshLayout.setRefreshing(false);
-                TabPerformedEvents newEvent = new TabPerformedEvents();
             }
         });
 
@@ -131,7 +128,7 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
         Log.i(LOG_TAG, "--ON CREATE LOADER--");
         mEmptyStateLinLayout.setVisibility(View.GONE);
         mLoadingBar.setVisibility(View.VISIBLE);
-        mRefreshBtn.setVisibility(View.GONE);
+
         // Create a new loader for the given URL
         return new EventLoader(getContext(), baseUrl);
     }
@@ -140,12 +137,11 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
         Log.i(LOG_TAG, "--ON LOAD FINISHED--");
 
         mLoadingBar.setVisibility(View.GONE);
-        mRefreshBtn.setVisibility(View.VISIBLE);
 
-        // Clear the adapter of previous book data
+        // Clear the adapter of previous event data
         mAdapter.clear();
 
-        // If there is a valid list of {@link Book}s, then add them to the adapter's
+        // If there is a valid list of {@link Event}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         if ( events != null && !events.isEmpty()) {
             mAdapter.addAll(events);
@@ -153,6 +149,14 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
             mUsernameHeader.setVisibility(View.VISIBLE);
             mAccountBtn.setImageBitmap(Bitmap.createScaledBitmap((PublicEventActivity.mUser.getAvatar()), 100, 100, true));
         } else {
+
+            // if the an invalid username was entered
+            if (mUsernameHeader.getText() == "" && PublicEventActivity.mUser != null) {
+                Toast.makeText(getContext(), "Invalid username.", Toast.LENGTH_SHORT).show();
+                baseUrl = baseUrl.replace(PublicEventActivity.mUser.getUsername(), ":username");
+            }
+
+            // reset layout post sign out / invalid username entry
             PublicEventActivity.mUser = null;
             mEmptyStateImgView.setImageResource(R.drawable.ic_account_circle_black_24dp);
             mEmptyStateTxtView.setText("Sign in to see your public events.");
@@ -171,6 +175,7 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
 
     private void resetLoader() {
         getLoaderManager().restartLoader(EVENT_LOADER_ID, null, this);
+        getLoaderManager().getLoader(EVENT_LOADER_ID).forceLoad();
     }
 
     /**
@@ -231,13 +236,13 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
         boolean editTxtVisible = true;
 
         switch (method) {
-            case "in":
+            case "in": // user signs in
                 header = "Sign In";
                 message = "Sign in using your GitHub credentials.";
                 actionBtn = "Sign In";
                 editTxtVisible = true;
                 break;
-            case "out":
+            case "out": // user signs out
                 header = "Sign Out";
                 message = "Are you sure you want to sign out?";
                 actionBtn = "Sign Out";
@@ -294,7 +299,6 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
             @Override
             public void onClick(View v) {
                 deletePopupWindow.dismiss();
-//                mainView.getForeground().setAlpha(0);
             }
         });
 
@@ -303,7 +307,6 @@ public class TabPerformedEvents extends Fragment implements LoaderManager.Loader
         deletePopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-//                mainView.getForeground().setAlpha(0);
                 deletePopupWindow.dismiss();
             }
         });
